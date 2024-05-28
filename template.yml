@@ -1,0 +1,201 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+
+Metadata:
+  AWS::ServerlessRepo::Application:
+    Name: MICROSERVICE-API-LAMBDA-MONGODB
+    Description: >
+      This is a SAM project for a Python MongoDB CRUD microservice.
+    Author: WEKAN
+    SpdxLicenseId: Apache-2.0
+    LicenseUrl: LICENSE.txt
+    ReadmeUrl: readme.md
+    Labels: ['Mongodb']
+    HomePageUrl: https://bitbucket.org/We-Kan-Code/microservice-api-lambda-mongodb/
+    SemanticVersion: 0.0.1
+    SourceCodeUrl: https://bitbucket.org/We-Kan-Code/microservice-api-lambda-mongodb/
+
+Parameters:
+  ProvisionNewCluster:
+    AllowedValues: ["true", "false"]
+    Default: "false"
+    Type: String
+    Description: >
+      Specifies whether to provision a new cluster.
+      If set to "false", existing cluster details will be used, and new cluster-related parameters will be skipped.
+  AtlasProjectName:
+    Type: String
+    Default: atlas-project
+    Description: >
+      The name of the MongoDB Atlas project.
+      If ProvisionNewCluster is false, this parameter is skipped.
+  OrgId:
+    Type: String
+    Default: ""
+    Description: >
+      The organization ID for MongoDB Atlas.
+      If ProvisionNewCluster is false, this parameter is skipped.
+  ClusterName:
+    Type: String
+    Default: test-cluster
+    Description: >
+      The name of the MongoDB Atlas cluster.
+      If ProvisionNewCluster is false, this parameter is skipped.
+  RegionName:
+    Type: String
+    Default: US_EAST_1
+    Description: >
+      The region where the MongoDB Atlas cluster will be deployed.
+      If ProvisionNewCluster is false, this parameter is skipped.
+  AtlasDatabaseUserPassword:
+    Type: String
+    Default: serverlessuser
+    Description: >
+      The password for the MongoDB Atlas database user.
+      If ProvisionNewCluster is false, this parameter is skipped.
+  AtlasDatabaseUsername:
+    Type: String
+    Default: serverlessuser
+    Description: >
+      The username for the MongoDB Atlas database user.
+      If ProvisionNewCluster is false, this parameter is skipped.
+  AtlasIpAccessListIPAddress:
+    Type: String
+    Default: 0.0.0.0/0
+    Description: >
+      The IP address for the MongoDB Atlas IP access list.
+      If ProvisionNewCluster is false, this parameter is skipped.
+  AtlasProfileName:
+    Type: String
+    Default: default
+    Description: >
+      The profile name for MongoDB Atlas.
+      If ProvisionNewCluster is false, this parameter is skipped.
+  ConnectionString:
+    Type: String
+    Description: >
+      Required if ProvisionNewCluster is false.
+      The connection string for MongoDB Atlas.
+      If ProvisionNewCluster is true, this parameter is skipped.
+    Default: ""
+
+  CollectionName:
+    Type: String
+    Description: >
+      Mongodb collection name, where you want to save data
+    Default: "test"
+
+
+
+Conditions:
+  CreateCluster:
+    Fn::Equals:
+      - !Ref ProvisionNewCluster
+      - "true"
+
+  UseAtlasConnectionString:
+    Fn::Equals:
+      - !Ref ProvisionNewCluster
+      - "true"
+
+
+Resources:
+  AtlasProject:
+    Type: MongoDB::Atlas::Project
+    Condition: CreateCluster
+    Properties:
+      Name: !Ref AtlasProjectName 
+      OrgId: !Ref OrgId
+      Profile: default
+
+  AtlasCluster:
+    Type: MongoDB::Atlas::Cluster
+    Condition: CreateCluster
+    Properties:
+      ClusterType: REPLICASET
+      Profile: default
+      ProjectId:
+        Fn::GetAtt:
+          - AtlasProject
+          - Id
+      Name: !Ref ClusterName
+      ReplicationSpecs:
+        - NumShards: 1
+          AdvancedRegionConfigs:
+            - RegionName: !Ref RegionName
+              BackingProviderName: AWS
+              ProviderName: TENANT
+              AnalyticsSpecs:
+                EbsVolumeType: STANDARD
+                InstanceSize: M0
+                NodeCount: 1
+              ElectableSpecs:
+                EbsVolumeType: STANDARD
+                InstanceSize: M0
+                NodeCount: 3
+              Priority: 7
+
+  AtlasDatabaseUser:
+    Type: MongoDB::Atlas::DatabaseUser
+    Condition: CreateCluster
+    Properties:
+      DatabaseName: admin
+      Password: !Ref AtlasDatabaseUserPassword
+      ProjectId:
+        Fn::GetAtt:
+          - AtlasProject
+          - Id
+      Roles:
+        - DatabaseName: admin
+          RoleName: atlasAdmin
+      Username: !Ref AtlasDatabaseUsername
+      Profile: !Ref AtlasProfileName
+
+  AtlasIpAccessList:
+    Type: MongoDB::Atlas::ProjectIpAccessList
+    Condition: CreateCluster
+    Properties:
+      AccessList:
+        - Comment: My first IP address
+          IPAddress: !Ref AtlasIpAccessListIPAddress
+      ProjectId:
+        Fn::GetAtt:
+          - AtlasProject
+          - Id
+      Profile: default
+
+
+
+  CRUDLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      Runtime: python3.10
+      Timeout: 15
+      CodeUri: ./lambda/python-crud-lambda/
+      Handler: app.lambda_handler
+      Environment:
+        Variables:
+          ATLAS_CONNECTION_STRING:
+            Fn::If:
+              - UseAtlasConnectionString
+              - Fn::GetAtt:
+                  - AtlasCluster
+                  - ConnectionStrings.StandardSrv
+              - !Ref ConnectionString
+          DB_USERNAME: !Ref AtlasDatabaseUsername
+          DB_PASSWORD: !Ref AtlasDatabaseUserPassword
+          DB_NAME: !Ref ClusterName
+          NEW_CLUSTER: !Ref ProvisionNewCluster
+          COLLECTION_NAME: !Ref CollectionName
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
+      Events:
+        GetEvent:
+          Type: Api
+          Properties:
+            Path: /
+            Method: ANY
+
+Outputs:
+  WebEndpoint:
+    Description: API Gateway endpoint URL for Prod stage
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
