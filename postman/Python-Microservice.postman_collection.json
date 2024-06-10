@@ -1,0 +1,153 @@
+{
+	"info": {
+		"_postman_id": "90eb1521-2e04-41bf-bce4-bf147bf667e1",
+		"name": "Python-Microservice",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "21766500",
+		"_collection_link": "https://www.postman.com/winter-capsule-579725/workspace/python-microservice-api/collection/21766500-90eb1521-2e04-41bf-bce4-bf147bf667e1?action=share&source=collection_link&creator=21766500"
+	},
+	"item": [
+		{
+			"name": "GET ALL",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{api_gateway_url}}",
+					"host": [
+						"{{api_gateway_url}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CREATE",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Lorem ipsum\",\n    \"age\": 23,\n    \"country\": \"IN\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{api_gateway_url}}",
+					"host": [
+						"{{api_gateway_url}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET BY PARAMETER",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{api_gateway_url}}?_id=66201e44d5ffb8aaf36b83bf",
+					"host": [
+						"{{api_gateway_url}}"
+					],
+					"query": [
+						{
+							"key": "name",
+							"value": "Abhishek",
+							"disabled": true
+						},
+						{
+							"key": "country",
+							"value": "IN",
+							"disabled": true
+						},
+						{
+							"key": "_id",
+							"value": "66201e44d5ffb8aaf36b83bf"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "UPDATE",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"_id\": \"66201af1d5ffb8aaf36b83ae\",\n    \"name\": \"Lorem Ipsum 2\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{api_gateway_url}}",
+					"host": [
+						"{{api_gateway_url}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DELETE",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"_id\": \"66201ddcd5ffb8aaf36b83b8\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{api_gateway_url}}",
+					"host": [
+						"{{api_gateway_url}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "api_gateway_url",
+			"value": "https://r1elqftk64.execute-api.ap-south-1.amazonaws.com/Prod",
+			"type": "string"
+		}
+	]
+}

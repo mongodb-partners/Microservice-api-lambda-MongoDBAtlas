@@ -7,5 +7,9 @@ samconfig.toml
 # Ignore sam package file
 packaged.yaml
 
+# Ignore cdk out files
+atlas-aws-bootstrap-cdk/.cdk.staging
+atlas-aws-bootstrap-cdk/cdk.out
+
 # Ignore .aws-sam directory
 .aws-sam/

@@ -1,2 +1,2 @@
 requests
-pymongo[srv]==3.12.0
+pymongo[srv]==4.7.3
