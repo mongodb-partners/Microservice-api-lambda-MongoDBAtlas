@@ -6,7 +6,7 @@ Metadata:
     Name: MICROSERVICE-API-LAMBDA-MONGODB
     Description: >
       This is a SAM project for a Python MongoDB CRUD microservice.
-    Author: WEKAN
+    Author: MongoDb
     SpdxLicenseId: Apache-2.0
     LicenseUrl: LICENSE.txt
     ReadmeUrl: readme.md
