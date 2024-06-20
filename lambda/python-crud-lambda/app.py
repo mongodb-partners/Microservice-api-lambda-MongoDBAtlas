@@ -5,20 +5,12 @@ from bson import ObjectId
 
 # Environment variables
 ATLAS_CONNECTION_STRING = os.environ['ATLAS_CONNECTION_STRING']
-DB_USERNAME = os.environ['DB_USERNAME']
-DB_PASSWORD = os.environ['DB_PASSWORD']
-DB_NAME = os.environ['DB_NAME']
-NEW_CLUSTER = os.environ['NEW_CLUSTER']
 COLLECTION_NAME = os.environ['COLLECTION_NAME']
+DB_NAME = os.environ['DB_NAME']
 
-# Construct MongoDB URI
-uri = f"{ATLAS_CONNECTION_STRING}/{DB_NAME}?retryWrites=true&w=majority"
 
 def connect_to_mongodb():
-    if NEW_CLUSTER == "true":
-        client = MongoClient(uri, username=DB_USERNAME, password=DB_PASSWORD)
-    else:
-        client = MongoClient(ATLAS_CONNECTION_STRING)
+    client = MongoClient(ATLAS_CONNECTION_STRING)
     return client
 
 def success_response(body):
